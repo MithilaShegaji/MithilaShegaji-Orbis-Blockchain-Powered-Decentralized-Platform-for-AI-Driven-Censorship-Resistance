@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Hardhat
+artifacts/
+cache/
+typechain/
+typechain-types/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+deployment_log.txt
+address_log.txt
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.pkl
+*.h5
+*.joblib
+Fake_News_Detection-main/
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*.swn
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.zip
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+.git_backup/

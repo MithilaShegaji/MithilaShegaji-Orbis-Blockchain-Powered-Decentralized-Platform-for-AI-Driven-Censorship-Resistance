@@ -1,0 +1,27 @@
+{
+  "name": "orbis---major_project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.2",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "hardhat": "^2.22.10"
+  }
+}

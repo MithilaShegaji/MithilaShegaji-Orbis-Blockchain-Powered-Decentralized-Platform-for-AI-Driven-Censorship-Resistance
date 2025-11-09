@@ -1,0 +1,2 @@
+# Orbis-Blockchain-Powered-Decentralized-Platform-for-AI-Driven-Censorship-Resistance
+Orbis combines AI-powered analysis with blockchain validator voting to verify news credibility and resist censorship. Articles get trust scores (0-100). High scores auto-publish; lower scores need validator review. Staked validators earn rewards for accuracy, face penalties for errors. IPFS storage ensures permanent access, truth cannot be silenced

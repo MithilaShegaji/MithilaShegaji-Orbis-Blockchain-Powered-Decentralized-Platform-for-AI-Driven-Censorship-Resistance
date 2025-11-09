@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(if exist __pycache__ rmdir /s /q __pycache__)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx hardhat:*)",
+      "Bash(cat:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(GIT_LFS_SKIP_SMUDGE=1 git push:*)",
+      "Bash(git lfs uninstall:*)",
+      "Bash(if exist .git_backup rmdir /s /q .git_backup)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
