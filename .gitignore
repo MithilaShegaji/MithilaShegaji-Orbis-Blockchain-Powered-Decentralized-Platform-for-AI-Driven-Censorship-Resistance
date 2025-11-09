@@ -41,7 +41,14 @@ ENV/
 *.pkl
 *.h5
 *.joblib
-Fake_News_Detection-main/
+*.safetensors
+
+# Fake News Detection - exclude large files only
+Fake_News_Detection-main/venv/
+Fake_News_Detection-main/models/*.pkl
+Fake_News_Detection-main/models/*.safetensors
+Fake_News_Detection-main/models/*.dll
+Fake_News_Detection-main/models/*.lib
 
 # IDEs and editors
 .vscode/*

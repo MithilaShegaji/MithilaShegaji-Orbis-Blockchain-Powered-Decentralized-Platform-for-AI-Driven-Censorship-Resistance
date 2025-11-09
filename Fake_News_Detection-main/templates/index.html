@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fake News Detection</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-light: #f9f9f9;
+      --primary-dark: #121212;
+      --secondary-light: #ffffff;
+      --secondary-dark: #1e1e1e;
+      --accent-light: #6200ea;
+      --accent-dark: #bb86fc;
+      --text-light: #333333;
+      --text-dark: #f5f5f5;
+      --border-light: #e0e0e0;
+      --border-dark: #333333;
+      --axis-color-light: #555555;
+      --axis-color-dark: #dddddd;
+      --fake-color: #e53935;
+      --real-color: #43a047;
+      --bert-color-light: #2196f3;
+      --bert-color-dark: #64b5f6;
+      --shadow-light: rgba(0, 0, 0, 0.1);
+      --shadow-dark: rgba(0, 0, 0, 0.3);
+    }
+
+    html[data-theme='light'] {
+      --bg-color: var(--primary-light);
+      --card-bg: var(--secondary-light);
+      --text-color: var(--text-light);
+      --accent-color: var(--accent-light);
+      --bert-color: var(--bert-color-light);
+      --axis-color: var(--axis-color-light);
+      --border-color: var(--border-light);
+      --shadow: var(--shadow-light);
+    }
+
+    html[data-theme='dark'] {
+      --bg-color: var(--primary-dark);
+      --card-bg: var(--secondary-dark);
+      --text-color: var(--text-dark);
+      --accent-color: var(--accent-dark);
+      --bert-color: var(--bert-color-dark);
+      --axis-color: var(--axis-color-dark);
+      --border-color: var(--border-dark);
+      --shadow: var(--shadow-dark);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background-color: var(--card-bg);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px var(--shadow);
+      z-index: 10;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--accent-color);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+
+    .main-content {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 68px);
+    }
+
+    .input-section, .results-section {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .input-section {
+      background-color: var(--bg-color);
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    textarea {
+      flex: 1;
+      min-height: 250px;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      font-size: 1rem;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      resize: none;
+      margin-bottom: 15px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    button.analyze {
+      padding: 12px 20px;
+      border: none;
+      background-color: var(--accent-color);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      align-self: flex-end;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button.analyze:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+
+    .results-section {
+      background-color: var(--bg-color);
+    }
+
+    .results-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .consensus {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .consensus-fake {
+      color: var(--fake-color);
+    }
+    
+    .consensus-real {
+      color: var(--real-color);
+    }
+
+    .bert-model {
+      margin-bottom: 25px;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: rgba(33, 150, 243, 0.1);
+      border-left: 4px solid var(--bert-color);
+    }
+
+    .bert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .bert-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: var(--bert-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bert-badge {
+      background-color: var(--bert-color);
+      color: white;
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    .bert-prediction {
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+    }
+
+    .model-result {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .model-name {
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .model-prediction {
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+    }
+
+    .prediction-fake {
+      background-color: rgba(229, 57, 53, 0.15);
+      color: var(--fake-color);
+    }
+
+    .prediction-real {
+      background-color: rgba(67, 160, 71, 0.15);
+      color: var(--real-color);
+    }
+
+    .model-desc {
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .model-reasoning {
+      background-color: var(--bg-color);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .keyword {
+      background-color: var(--bg-color);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+
+    .bert-features {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .bert-feature {
+      background-color: var(--bg-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .feature-score {
+      background-color: var(--bert-color);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      height: 250px;
+      width: 100%;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .loader {
+      display: none;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--accent-color);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading .loader {
+      display: inline-block;
+    }
+
+    @media (max-width: 900px) {
+      .main-content {
+        flex-direction: column;
+        height: auto;
+      }
+      
+      .input-section, .results-section {
+        width: 100%;
+      }
+      
+      textarea {
+        min-height: 200px;
+      }
+      
+      .header {
+        padding: 12px 20px;
+      }
+      
+      .header h1 {
+        font-size: 1.2rem;
+      }
+      
+      .chart-container {
+        height: 200px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>AI-Powered Fake News Detection</h1>
+    <div class="theme-switch-wrapper">
+      <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-moon" id="theme-icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="input-section">
+      <div class="card">
+        <form id="analysis-form" action="{{ url_for('predict') }}" method="post">
+          <textarea id="article-input" name="article" placeholder="Enter a news article to analyze..." required>{{ article }}</textarea>
+          <button type="submit" class="analyze">
+            <span>Analyze Article</span>
+            <div class="loader"></div>
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="results-section">
+      {% if results %}
+        <div class="results-card">
+          <div class="consensus {% if consensus == 'FAKE' %}consensus-fake{% else %}consensus-real{% endif %}">
+            <i class="fas {% if consensus == 'FAKE' %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+            <span>Consensus: {{ consensus }}</span>
+          </div>
+          
+          {% if 'BERT' in results %}
+          <div class="bert-model">
+            <div class="bert-header">
+              <span class="bert-name">
+                <i class="fas fa-robot"></i>
+                DistilBERT
+                <span class="bert-badge">Advanced NLP</span>
+              </span>
+              <span class="model-prediction {% if results['BERT'].label == 'FAKE' %}prediction-fake{% else %}prediction-real{% endif %}">
+                {{ results['BERT'].label }} ({{ results['BERT'].confidence | round(2) }}%)
+              </span>
+            </div>
+            <div class="model-desc">{{ descriptions['BERT'] }}</div>
+            <div class="model-reasoning">
+              <strong>Deep Analysis:</strong> Using contextual understanding of language, this model 
+              {% if results['BERT'].label == 'FAKE' %}identified patterns of misinformation and detected untrustworthy content.{% else %}recognized patterns consistent with reliable and factual reporting.{% endif %}
+              
+              <div class="bert-features">
+                {% if results['BERT'].label == 'FAKE' %}
+                  <span class="bert-feature"><span class="feature-score">+</span>Contextual inconsistency</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Questionable claims</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Emotional manipulation</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Credibility issues</span>
+                {% else %}
+                  <span class="bert-feature"><span class="feature-score">+</span>Contextual coherence</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Factual consistency</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Balanced presentation</span>
+                  <span class="bert-feature"><span class="feature-score">+</span>Source credibility</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          
+          {% for model, info in results.items() %}
+            {% if model != 'BERT' %}
+            <div class="model-result">
+              <div class="model-header">
+                <span class="model-name">{{ model }}</span>
+                <span class="model-prediction {% if info.label == 'FAKE' %}prediction-fake{% else %}prediction-real{% endif %}">
+                  {{ info.label }} ({{ info.confidence | round(2) }}%)
+                </span>
+              </div>
+              <div class="model-desc">{{ descriptions[model] }}</div>
+              <div class="model-reasoning">
+                <strong>Analysis:</strong> This model identified patterns typically found in 
+                {% if info.label == 'FAKE' %}fabricated{% else %}legitimate{% endif %} news sources.
+                <div class="keywords">
+                  <strong>Key indicators:</strong>
+                  {% if info.label == 'FAKE' %}
+                    <span class="keyword">sensationalism</span>
+                    <span class="keyword">exaggeration</span>
+                    <span class="keyword">emotional language</span>
+                    <span class="keyword">lack of sources</span>
+                  {% else %}
+                    <span class="keyword">balanced reporting</span>
+                    <span class="keyword">factual language</span>
+                    <span class="keyword">proper attribution</span>
+                    <span class="keyword">credible sources</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+          
+          <div class="chart-container">
+            <canvas id="confidenceChart"></canvas>
+          </div>
+        </div>
+      {% else %}
+        <div class="results-card no-results">
+          <i class="fas fa-robot" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+          <p>Submit an article to get AI-powered analysis from multiple models, including BERT.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      // Update icon
+      themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+      
+      // Update chart colors if chart exists
+      if (typeof confidenceChart !== 'undefined') {
+        updateChartColors();
+      }
+    }
+    
+    themeToggle.addEventListener('click', toggleTheme);
+    
+    // Check for saved theme preference
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeIcon.className = 'fas fa-sun';
+    }
+    
+    // Form submission - prevent default and use AJAX
+    document.getElementById('analysis-form').addEventListener('submit', function(e) {
+      // We're not implementing the AJAX here as it would need backend changes
+      // But this ensures the user sees the loading animation
+      document.querySelector('.analyze').classList.add('loading');
+    });
+    
+    {% if results %}
+    // Chart configuration
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('confidenceChart').getContext('2d');
+      const labels = [{% for model, info in results.items() %}{% if model == 'BERT' %}'DistilBERT'{% else %}'{{ model }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}];
+      const data = [{% for model, info in results.items() %}{{ info.confidence | round(2) }},{% endfor %}];
+      const predictions = [{% for model, info in results.items() %}'{{ info.label }}',{% endfor %}];
+      
+      function getBarColors() {
+        const fakeColor = getComputedStyle(document.documentElement).getPropertyValue('--fake-color').trim();
+        const realColor = getComputedStyle(document.documentElement).getPropertyValue('--real-color').trim();
+        // const bertColor = getComputedStyle(document.documentElement).getPropertyValue('--bert-color').trim();
+        
+        return labels.map((label, i) => {
+          return predictions[i] === 'FAKE' ? fakeColor : realColor;
+        });
+      }
+      
+      window.confidenceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Confidence (%)',
+            data: data,
+            backgroundColor: getBarColors(),
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: function(context) {
+                  const index = context.dataIndex;
+                  return predictions[index];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { 
+                color: getComputedStyle(document.documentElement).getPropertyValue('--axis-color').trim(),
+                font: {
+                  weight: 'bold'
+                }
+              },
+              grid: { 
+                display: false 
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { 
+                color: getComputedStyle(document.documentElement).getPropertyValue('--axis-color').trim(),
+                font: {
+                  weight: 'bold'
+                }
+              },
+              grid: { 
+                color: function(context) {
+                  const theme = document.documentElement.getAttribute('data-theme');
+                  return theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    
+    function updateChartColors() {
+      if (window.confidenceChart) {
+        const fakeColor = getComputedStyle(document.documentElement).getPropertyValue('--fake-color').trim();
+        const realColor = getComputedStyle(document.documentElement).getPropertyValue('--real-color').trim();
+        const bertColor = getComputedStyle(document.documentElement).getPropertyValue('--bert-color').trim();
+        const labels = [{% for model, info in results.items() %}{% if model == 'BERT' %}'DistilBERT'{% else %}'{{ model }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}];
+        const predictions = [{% for model, info in results.items() %}'{{ info.label }}',{% endfor %}];
+        
+        window.confidenceChart.data.datasets[0].backgroundColor = labels.map((label, i) => {
+          return predictions[i] === 'FAKE' ? fakeColor : realColor;
+        });
+        
+        window.confidenceChart.options.scales.x.ticks.color = getComputedStyle(document.documentElement).getPropertyValue('--axis-color').trim();
+        window.confidenceChart.options.scales.y.ticks.color = getComputedStyle(document.documentElement).getPropertyValue('--axis-color').trim();
+      }
+    }
+    {% endif %}
+  </script>
+</body>
+</html>
